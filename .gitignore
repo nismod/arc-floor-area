@@ -1,3 +1,7 @@
 *.csv
+*.gpkg
+*.zip
+db-data/*
+dbconfig.ini
 .ipynb_checkpoints
 
