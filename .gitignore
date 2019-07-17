@@ -1,7 +1,10 @@
 *.csv
 *.gpkg
+*.tif
 *.zip
+*.gz
+*.pdf
+
 db-data/*
 dbconfig.ini
 .ipynb_checkpoints
-

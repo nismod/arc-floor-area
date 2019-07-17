@@ -1,0 +1,3 @@
+Global Human Settlement Layer
+
+https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
