@@ -28,7 +28,7 @@ def main(base_path):
         key = os.path.basename(d).replace('arc_dwellings__', '').replace('.csv', '')
 
         # HACK hard-code match for economics scenarios against 23k dwellings scenarios
-        if key == "3-new-cities23":
+        if "new-cities" in key:
             econ_key = "1-new-cities"
         elif key == "4-expansion23":
             econ_key = "2-expansion"
