@@ -15,6 +15,11 @@ import pandas
 
 AVERAGE_DWELLING_M2 = 85  # based on average home size
 AVERAGE_NONRES_M2_PER_MGBP_GVA = 1  # based on no data, used in elasticity-based model
+FUTURE_SCENARIOS = [
+    {'scenario': 'base', 'average_dwelling_m2': AVERAGE_DWELLING_M2},
+    {'scenario': 'compact', 'average_dwelling_m2': AVERAGE_DWELLING_M2 * 0.75},
+    {'scenario': 'expand', 'average_dwelling_m2': AVERAGE_DWELLING_M2 * 1.25},
+]
 
 
 def main(base_path):
@@ -38,15 +43,48 @@ def main(base_path):
 
         d_df = pandas.read_csv(d)
         e_df = pandas.read_csv(e)
-        f_df = estimate_floor_area(d_df, e_df)
-        print(len(f_df), len(f_df.timestep.unique()), len(f_df.lad_uk_2016.unique()))
-        f_df.to_csv(os.path.join(output_path, 'arc_floor_area__{}.csv'.format(key)), index=False)
+
+        for scenario in FUTURE_SCENARIOS:
+            f_df = estimate_floor_area(d_df, e_df, scenario['average_dwelling_m2'])
+            print(len(f_df), len(f_df.timestep.unique()), len(f_df.lad_uk_2016.unique()))
+            f_df.to_csv(
+                os.path.join(
+                    output_path,
+                    'arc_floor_area__{}__{}.csv'.format(key, scenario['scenario'])
+                ),
+                index=False
+            )
 
 
-def estimate_floor_area(dwellings, gva):
+def estimate_floor_area(dwellings, gva, future_average_dwelling_m2):
+    # merge dwellings and gva for calculation
     floor_area = dwellings.merge(gva, on=['timestep', 'lad_uk_2016'])
-    floor_area['residential'] = floor_area.dwellings * AVERAGE_DWELLING_M2
+
+    # filter down to base year
+    floor_area_base = floor_area[floor_area.timestep == floor_area.timestep.min()].copy()
+
+    # merge base year back on
+    floor_area = floor_area.merge(
+        floor_area_base,
+        how='left',
+        validate='many_to_one',
+        on=['lad_uk_2016'],
+        suffixes=('', '_base')
+    )
+
+    # calculate new dwellings (since base year)
+    floor_area['dwellings_new'] = floor_area.dwellings - floor_area.dwellings_base
+
+    # Residential floor area as (base * base average + future * future average)
+    floor_area['residential'] = (
+        floor_area.dwellings_base * AVERAGE_DWELLING_M2
+        + floor_area.dwellings_new * future_average_dwelling_m2
+    )
+
+    # Non-residential floor area as (gva * average)
     floor_area['non_residential'] = floor_area.gva * AVERAGE_NONRES_M2_PER_MGBP_GVA
+
+    # create residential_or_non indicator column
     floor_area = floor_area[
         ['timestep', 'lad_uk_2016', 'residential' ,'non_residential']
     ].melt(
