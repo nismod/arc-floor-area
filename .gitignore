@@ -8,3 +8,5 @@
 db-data/*
 dbconfig.ini
 .ipynb_checkpoints
+data_processed/*
+

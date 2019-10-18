@@ -12,13 +12,13 @@ import sys
 
 import pandas
 
-
+# Numbers from RIBA Case for Space Report
 AVERAGE_DWELLING_M2 = 85  # based on average home size
 AVERAGE_NONRES_M2_PER_MGBP_GVA = 1  # based on no data, used in elasticity-based model
 FUTURE_SCENARIOS = [
     {'scenario': 'base', 'average_dwelling_m2': AVERAGE_DWELLING_M2},
-    {'scenario': 'compact', 'average_dwelling_m2': AVERAGE_DWELLING_M2 * 0.75},
-    {'scenario': 'expand', 'average_dwelling_m2': AVERAGE_DWELLING_M2 * 1.25},
+    {'scenario': 'compact', 'average_dwelling_m2': 76},  # average new build UK
+    {'scenario': 'expand', 'average_dwelling_m2': 115},  # average new build NL
 ]
 
 
